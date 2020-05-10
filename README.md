@@ -13,10 +13,10 @@
 3. 五部电梯门口的**按钮是互联结的**，即当一个电梯按钮按下去时，其他电梯的相应按钮也就同时点亮，表示也按下去了。
 4. 所有电梯初始状态都在第一层。每个电梯如果在它的上层或者下层没有相应请求情况下，则应该**在原地保持不动**。
 
-![eleStart](https://github.com/kb824999404/OS_Homeworks/blob/master/Elevator/Imgs/start.PNG)
+![eleStart](https://cdn.jsdelivr.net/gh/kb824999404/OS_Homeworks/Elevator/Imgs/start.PNG)
 
-![elemain](https://github.com/kb824999404/OS_Homeworks/blob/master/Elevator/Imgs/mainScene.PNG)
+![elemain](https://cdn.jsdelivr.net/gh/kb824999404/OS_Homeworks/Elevator/Imgs/mainScene.PNG)
 
-![eleEle](https://github.com/kb824999404/OS_Homeworks/blob/master/Elevator/Imgs/elevator.PNG)
+![eleEle](https://cdn.jsdelivr.net/gh/kb824999404/OS_Homeworks/Elevator/Imgs/elevator.PNG)
 
-![elefloor](https://github.com/kb824999404/OS_Homeworks/blob/master/Elevator/Imgs/floor.PNG)
+![elefloor](https://cdn.jsdelivr.net/gh/kb824999404/OS_Homeworks/Elevator/Imgs/floor.PNG)
