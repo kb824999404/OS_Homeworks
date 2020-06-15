@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="shortcut icon" href="./imgs/memory.png">
+        <title id="title">Dynamic Partition</title>
+        <!-- 引入样式 -->
+        <link rel="stylesheet" href="https://unpkg.com/element-ui@2.13.2/lib/theme-chalk/index.css">
+        <link rel="stylesheet" href="./styles/style.css">
+    </head>
+    <body>
+        <div id="app">
+            <el-row id="titleText" type="flex" justify="center">
+                <el-col :span="12">
+                    <h1>{{title}}</h1>
+                </el-col>
+            </el-row>
+            <!-- 内存模型 -->
+            <el-row  type="flex" justify="center">
+                <el-col id="memory" :span="24">
+                </el-col>
+            </el-row>
+            <el-row id="actionArea" type="flex" justify="center" gutter="40">
+                <!-- 选择算法 -->
+                <el-col class="card action" id="selectAlog" :span="6">
+                    <el-row type="flex" justify="center">
+                        <p>请选择分区分配算法</p>
+                    </el-row>
+                    <el-row type="flex" justify="center">
+                        <el-select v-model="algorithm" :disabled="isStart">
+                            <el-option
+                              v-for="item in alogOptions"
+                              :key="item.value"
+                              :label="item.label"
+                              :value="item.value">
+                            </el-option>
+                          </el-select>
+                    </el-row>
+                </el-col>
+                <el-col class="card action" id="selectSize" :span="8">
+                    <!-- 内存空间大小 -->
+                    <el-row type="flex" justify="center">
+                        <p>请选择内存空间大小</p>
+                    </el-row>
+                    <el-row type="flex" justify="center">
+                        <el-col id="selectSize" :span="24">
+                            <el-slider v-model="memorySize" :disabled="isStart"
+                            :min="minMemorySize" :max="maxMemorySize" step="20"  @input="onSizeChange()"
+                            show-input></el-slider>
+                        </el-col>
+                    </el-row>
+                    <!-- 运行速度大小 -->
+                    <el-row type="flex" justify="center">
+                        <p>请选择运行速度大小(毫秒/作业)</p>
+                    </el-row>
+                    <el-row type="flex" justify="center">
+                        <el-col :span="20">
+                            <el-slider v-model="speed" :disabled="isStart" style="margin-top: 8px;"
+                            :min="100" :max="1000" step="50"></el-slider>
+                        </el-col>
+                    </el-row>
+                </el-col>
+                <el-col class="card action" id="buttons" :span="6">
+                    <!-- 运行控制 -->
+                    <el-row type="flex" justify="center" >
+                        <p>请选择运行方式：
+                            <!-- 单步/连续 -->
+                            <el-switch
+                            v-model="isContinuted" :disabled="isStart"
+                            active-text="连续" inactive-text="单步">
+                            </el-switch>
+                        </p>
+                    </el-row>
+                    <el-row type="flex" justify="center" gutter="40"> 
+                        <el-col :span="6">
+                            <!-- 开始/暂停/继续按钮 -->
+                            <el-button type="primary" :disabled="isEnd||(!isContinuted&&isStart)" 
+                            @click="onStartClick()" plain>
+                                {{getStartBtnText() }}
+                            </el-button>
+                        </el-col>
+                        <el-col :span="7">
+                            <!-- 下一步 -->
+                            <el-button type="primary" :disabled="!isStart||isEnd" 
+                            @click="onNextClick()" plain>下一步</el-button>
+                        </el-col>
+                        <el-col :span="6">
+                            <!-- 重置 -->
+                            <el-button type="primary" plain
+                            @click="onResetClick()">重置</el-button>
+                        </el-col>
+                    </el-row>
+                </el-col>
+            </el-row>
+            <el-row id="logInfo" type="flex" justify="center" gutter="40">
+                <el-col :span="1"></el-col>
+                <!-- 作业列表 -->
+                <el-col class="card" :span="7">
+                    <el-row type="flex" justify="center" >
+                        <p>作业列表</p>
+                    </el-row>
+                    <el-row type="flex" justify="center">
+                        <el-table id="taskTable"
+                        :data="taskList" max-height="350">
+                        <el-table-column
+                            prop="name"
+                            label="作业名"
+                            width="100">
+                            <template slot-scope="scope">
+                                <div v-if="scope.$index == 0">
+                                    <el-input size="mini" v-model="newTaskName"></el-input>
+                                </div>
+                                <div v-else>{{scope.row.getName()}}</div>
+                              </template>
+                        </el-table-column>
+                        <el-table-column
+                            prop="size"
+                            label="申请内存大小"
+                            width="110">
+                            <template slot-scope="scope">
+                                <div v-if="scope.$index == 0">
+                                    <el-input size="mini" v-model="newTaskSize"></el-input>
+                                </div>
+                                <div v-else>{{scope.row.getData()}}</div>
+                              </template>
+                        </el-table-column>
+                        <el-table-column label="操作">
+                            <template slot-scope="scope">
+                                <div v-if="scope.$index == 0">
+                                    <el-button size="mini" type="primary" :disabled="isStart"
+                                    @click="addTask()">添加</el-button>
+                                </div>
+                                <div v-else>
+                                    <el-button
+                                    size="mini" type="danger" :disabled="isStart"
+                                    @click="deleteTask(scope.$index, scope.row)">删除</el-button>
+                                </div>
+                              </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-row>
+                </el-col>
+                <el-col :span="8">
+                    <!-- 日志信息 -->
+                    <el-card id="logBox" class="box-card">
+                        <div slot="header" class="clearfix">
+                          <span>日志信息</span>
+                        </div>
+                        <div v-for="message in logList">
+                            <br>
+                            {{getLogInfo(message)}}
+                            <div v-if="message.getStatus()==ADDSUCCESS ">
+                                {{'起始位置是'+message.getStart()}}
+                            </div> 
+                        </div>
+                      </el-card>
+                </el-col>
+                <el-col :span="1"></el-col>
+                <el-col :span="5">
+                    <!-- 空闲区表 -->
+                    <div class="card">
+                        <p>空闲区表</p>
+                        <el-table
+                        :data="useableMem" max-height="150">
+                        <el-table-column
+                            prop="startPos"
+                            label="起始地址"
+                            width="100">
+                            <template slot-scope="scope">
+                                {{scope.row.getStart()}}
+                              </template>
+                        </el-table-column>
+                        <el-table-column
+                            prop="length"
+                            label="长度"
+                            width="100">
+                            <template slot-scope="scope">
+                                {{scope.row.getSize()}}
+                              </template>
+                        </el-table-column>
+                    </el-table>
+                    </div>
+                    <!-- 已分配区表 -->
+                    <div class="card">
+                        <p>已分配区表</p>
+                        <el-table
+                            :data="occupyMem" max-height="150">
+                            <el-table-column
+                                prop="startPos"
+                                label="起始地址"
+                                width="80">
+                                <template slot-scope="scope">
+                                    {{scope.row.getStart()}}
+                                  </template>
+                            </el-table-column>
+                            <el-table-column
+                                prop="length"
+                                label="长度"
+                                width="60">
+                                <template slot-scope="scope">
+                                    {{scope.row.getSize()}}
+                                  </template>
+                            </el-table-column>
+                            <el-table-column
+                                prop="mark"
+                                label="标志"
+                                width="80">
+                                <template slot-scope="scope">
+                                    {{taskList[scope.row.getMark()].getName()}}
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                </el-col>
+                <el-col :span="2"></el-col>
+            </el-row>
+        </div>
+    </body>
+      <!-- import Vue before Element -->
+    <script src="./scripts/include/vue.min.js"></script>
+    <!-- import JavaScript -->
+    <script src="./scripts/include/index.js"></script>
+    <script src="./scripts/assignment.js"></script>
+    <script src="./scripts/main.js"></script>
+</html>

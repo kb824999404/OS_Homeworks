@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="shortcut icon" href="./imgs/memory.png">
+        <title id="title">Demand Paging</title>
+        <!-- 引入样式 -->
+        <link rel="stylesheet" href="https://unpkg.com/element-ui@2.13.2/lib/theme-chalk/index.css">
+        <link rel="stylesheet" href="./styles/style.css">
+    </head>
+    <body>
+        <div id="app">
+            <el-row id="titleText" type="flex" justify="center">
+                <el-col :span="12">
+                    <h1>{{title}}</h1>
+                </el-col>
+            </el-row>
+            <el-row id="actionArea" type="flex" justify="center" gutter="40">
+                <!-- 选择算法 -->
+                <el-col class="card action" :span="6">
+                    <el-row type="flex" justify="center">
+                        <p>请选择置换算法</p>
+                    </el-row>
+                    <el-row type="flex" justify="center">
+                        <el-select v-model="algorithm" :disabled="isStart">
+                            <el-option
+                              v-for="item in alogOptions"
+                              :key="item.value"
+                              :label="item.label"
+                              :value="item.value">
+                            </el-option>
+                          </el-select>
+                    </el-row>
+                </el-col>
+                <el-col class="card action" :span="8">
+                    <el-row type="flex" justify="center">
+                        <el-col :span="12"><p>运行速度(毫秒/指令):</p></el-col>
+                        <el-col :span="12">
+                            <el-slider v-model="speed" :disabled="isStart" style="margin-top: 8px;"
+                            :min="10" :max="500" step="10"></el-slider>
+                        </el-col>
+                    </el-row>
+                    <el-row class="text-H" type="flex" justify="center">
+                        <el-col :span="6"><p>缺页数：</p></el-col>
+                        <el-col :span="2" style="color: #1E90FF; font-weight: bold;">
+                            <p>{{getMissNum()}}</p>
+                        </el-col>
+                    </el-row>
+                    <el-row class="text-H" type="flex" justify="center">
+                        <el-col :span="6"><p>缺页率：</p></el-col>
+                        <el-col :span="2" style="color: #1E90FF; font-weight: bold;">
+                            <p>{{getMissRate()}}%</p>
+                        </el-col>
+                    </el-row>
+                </el-col>
+                <el-col class="card action" :span="6">
+                    <el-row type="flex" justify="center" >
+                        <p>请选择运行方式：
+                            <el-switch
+                            v-model="isContinuted" :disabled="isStart"
+                            active-text="连续" inactive-text="单步">
+                            </el-switch>
+                        </p>
+                    </el-row>
+                    <el-row type="flex" justify="center" gutter="40"> 
+                        <el-col :span="6">
+                            <el-button type="primary" :disabled="isEnd||(!isContinuted&&isStart)" 
+                            @click="onStartClick()" plain>
+                                {{getStartBtnText() }}
+                            </el-button>
+                        </el-col>
+                        <el-col :span="7">
+                            <el-button type="primary" :disabled="!isStart||isEnd" 
+                            @click="onNextClick()" plain>下一步</el-button>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-button type="primary" plain
+                            @click="onResetClick()">重置</el-button>
+                        </el-col>
+                    </el-row>
+                </el-col>
+            </el-row>
+            <el-row id="info" class="row" type="flex" justify="center" gutter="40">
+                <el-col :span="7">
+                    <div class="card">
+                        <p>指令执行情况</p>
+                        <el-table :row-class-name="tableRowClassName"
+                        :data="cmdList" max-height="250">
+                        <el-table-column
+                            prop="id"
+                            label="指令编号"
+                            width="100">
+                            <template slot-scope="scope">
+                                {{scope.row.id}}
+                              </template>
+                        </el-table-column>
+                        <el-table-column
+                            prop="address"
+                            label="指令地址"
+                            width="100">
+                            <template slot-scope="scope">
+                                {{scope.row.address}}
+                              </template>
+                        </el-table-column>
+                        <el-table-column
+                        prop="page"
+                        label="指令页号"
+                        width="100">
+                        <template slot-scope="scope">
+                            {{getPage(scope.row.address)}}
+                          </template>
+                    </el-table-column>
+                    </el-table>
+                    </div>
+                </el-col>
+
+                <el-col :span="7">
+                    <div class="card">
+                        <p>内存情况</p>
+                        <el-table
+                            :data="memBlocks" max-height="250">
+                            <el-table-column
+                                prop="id"
+                                label="内存块编号"
+                                width="100">
+                                <template slot-scope="scope">
+                                    {{scope.$index}}
+                                  </template>
+                            </el-table-column>
+                            <el-table-column
+                                prop="page"
+                                label="页号"
+                                width="100">
+                                <template slot-scope="scope">
+                                    {{(scope.row==-1)?'空':scope.row}}
+                                  </template>
+                            </el-table-column>
+                            <el-table-column
+                                prop="range"
+                                label="地址范围"
+                                width="100">
+                                <template slot-scope="scope">
+                                    {{ getRange(scope.row) }}
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                </el-col>
+            </el-row>
+            <el-row id="logMessage" class="row" type="flex" justify="center" gutter="40">
+                <el-col :span="16">
+                    <el-card id="logBox" class="box-card">
+                        <div slot="header" class="clearfix">
+                          <span>日志信息</span>
+                        </div>
+                        <div  v-for="message in logList">
+                            <br>
+                            {{ message }}
+                        </div>
+                      </el-card>
+                </el-col>
+            </el-row>
+        </div>
+    </body>
+      <!-- import Vue before Element -->
+    <script src="./scripts/include/vue.min.js"></script>
+    <!-- import JavaScript -->
+    <script src="./scripts/include/index.js"></script>
+    <script src="./scripts/memory.js"></script>
+    <script src="./scripts/main.js"></script>
+</html>

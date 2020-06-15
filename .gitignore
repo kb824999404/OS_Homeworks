@@ -76,3 +76,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+#Mine
+ToCommit/
+*.pdf
