@@ -1,0 +1,66 @@
+h1,p,div {
+    text-align: center;
+}
+#app{
+    border-radius: 1%;
+    box-shadow: 0 0 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+    /* padding: 20px; */
+    background-color: rgba(0,0,0,.02);
+}
+
+.Page {
+    width: 100%;
+    height: 97vh;  /* 占满屏幕 */
+    padding: 0;
+    margin: 0;
+    /* display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; */
+    overflow: hidden;
+    /* transition: 1s cubic-bezier(0.2, 0.8, 0.2, 1); */
+}
+.el-col.sider {
+    height: 100vh;
+    /* background-color: gray; */
+    background-color: rgba(0,0,0,.03);
+}
+.el-tree{
+    background-color: rgba(0,0,0,.03);
+}
+
+.headerBar{
+    padding: 10px;
+    display: flex;
+    /* flex-direction: column; */
+    /* justify-content: center; */
+    align-items: center;
+    background-color: rgba(0,0,0,.05);
+}
+.headerBar .el-button{
+    flex-grow: 0;
+    margin-right: 10px;
+}
+.headerBar .el-breadcrumb{
+    padding: 10px;
+    flex-grow: 1;
+}
+#hepler{
+    top: 5%;
+}
+#fileInfo{
+    top: 10%;
+}
+#diskInfo{
+    top: 10%;
+}
+.infoKey{
+    color: #1E90FF;
+    text-align: right;
+}
+.el-dialog{
+    color: #1E90FF;
+}
+.helper-text p{
+    text-align: left;
+}
